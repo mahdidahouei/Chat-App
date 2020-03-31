@@ -1,3 +1,5 @@
+// const moment = require('moment');
+
 let socket = io();
 
 socket.on('connect', function(){
@@ -9,19 +11,35 @@ socket.on('disconnect', function(){
 });
 
 socket.on('newMessage', function(message){
-    let li = document.createElement('li');
-    li.innerText = `${message.from}: ${message.text}`;
-    document.querySelector('body').appendChild(li);
-});
+    const formatedTime = moment(message.createdAt).format('LT');
+    const template = document.querySelector('#message-template').innerHTML;
+    const html = Mustache.render(template,{
+        from: message.from,
+        text:message.text,
+        createdAt: formatedTime,
+    });
 
+    const div = document.createElement('div');
+    div.innerHTML = html;
+
+    document.querySelector('#messages').appendChild(div);
+
+
+});
 socket.on('newLocationMessage', function(message){
-    let li = document.createElement('li');
-    let a = document.createElement('a');
-    a.setAttribute('target','_blank');
-    a.setAttribute('href',message.url);
-    a.innerText = 'My current location';
-    li.appendChild(a);
-    document.querySelector('body').appendChild(li);
+    const formatedTime = moment(message.createdAt).format('LT');
+    const template = document.querySelector('#location-message-template').innerHTML;
+
+    const html = Mustache.render(template,{
+        from: message.from,
+        url: message.url,
+        createdAt: formatedTime,
+    });
+
+    const div = document.createElement('div');
+    div.innerHTML = html;
+
+    document.querySelector('#messages').appendChild(div);
 });
 
 document.querySelector('#submit-btn')
@@ -30,10 +48,11 @@ document.querySelector('#submit-btn')
         socket.emit('createMessage',{
             from: "User",
             text: document.querySelector('input[name="message"]').value,
-        }, function(message){
+        }, function(message){});
 
-        });
-});
+        document.querySelector('input[name="message"]').value = "";
+    }
+);
 
 document.querySelector('#send-location-btn')
     .addEventListener('click',function(e){
