@@ -17,10 +17,6 @@ socket.on('connect', function(){
     });
 });
 
-socket.on('disconnect', function(){
-    console.log('Disconnected from server.');
-});
-
 socket.on('newMessage', function(message){
     const formatedTime = moment(message.createdAt).format('LT');
     const template = document.querySelector('#message-template').innerHTML;
@@ -37,6 +33,7 @@ socket.on('newMessage', function(message){
 
     scrollToBottom();
 });
+
 socket.on('newLocationMessage', function(message){
     const formatedTime = moment(message.createdAt).format('LT');
     const template = document.querySelector('#location-message-template').innerHTML;
@@ -53,6 +50,23 @@ socket.on('newLocationMessage', function(message){
     document.querySelector('#messages').appendChild(div);
     
     scrollToBottom();
+});
+
+socket.on('updateUsersList', function(users){
+    let ol = document.createElement('ol');
+    users.forEach(function(user){
+        let li = document.createElement('li');
+        li.innerHTML = user;
+        ol.appendChild(li);
+    });
+
+    let usersList = document.querySelector('#users');
+    usersList.innerHTML = "";
+    usersList.appendChild(ol);
+});
+
+socket.on('disconnect', function(){
+    console.log('Disconnected from server.');
 });
 
 document.querySelector('#submit-btn')
