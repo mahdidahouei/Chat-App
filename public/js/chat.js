@@ -1,9 +1,20 @@
-// const moment = require('moment');
-
 let socket = io();
 
+function scrollToBottom(){
+    let message = document.querySelector('#messages').lastElementChild;
+    message.scrollIntoView();
+}
+
 socket.on('connect', function(){
-    console.log('Connected to server.');
+    let searchQuery = window.location.search.substring(1);
+    let params = JSON.parse('{"' + decodeURI(searchQuery).replace(/&/g, '","').replace(/\+/g, ' ').replace(/=/g,'":"')+'"}');
+
+    socket.emit('join', params, function(err){
+        if(err){
+            alert(err);
+            window.location.href = '/';
+        }
+    });
 });
 
 socket.on('disconnect', function(){
@@ -24,7 +35,7 @@ socket.on('newMessage', function(message){
 
     document.querySelector('#messages').appendChild(div);
 
-
+    scrollToBottom();
 });
 socket.on('newLocationMessage', function(message){
     const formatedTime = moment(message.createdAt).format('LT');
@@ -40,6 +51,8 @@ socket.on('newLocationMessage', function(message){
     div.innerHTML = html;
 
     document.querySelector('#messages').appendChild(div);
+    
+    scrollToBottom();
 });
 
 document.querySelector('#submit-btn')
